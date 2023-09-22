@@ -3,14 +3,12 @@ package com.example.bluetooth_jetpackcompose_mvvm
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.MainScreen
 import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.ScreenViewModel
@@ -22,6 +20,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: ScreenViewModel by viewModels()
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ActivityCompat.requestPermissions(this, arrayOf(
@@ -37,21 +36,5 @@ class MainActivity : ComponentActivity() {
                 MainScreen(viewModel = viewModel)
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Bluetooth_JetPackCompose_MVVMTheme {
-        Greeting("Android")
     }
 }

@@ -4,6 +4,7 @@ package com.example.bluetoothmodule
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -17,7 +18,7 @@ class BtActions(private val context:Context) {
     private var mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 
     //Handles Bluetooth Turn On and off
-    fun btOn(){
+    fun changeBtAction(){
         if (ActivityCompat.checkSelfPermission(
                 /* context = */ context,
                 /* permission = */ Manifest.permission.BLUETOOTH_CONNECT
@@ -31,8 +32,6 @@ class BtActions(private val context:Context) {
                 }else{
                     mBluetoothAdapter.disable()
                 }
-
-
             } else {
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
                     val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -45,8 +44,24 @@ class BtActions(private val context:Context) {
         }
     }
 
+    //Return the Bluetooth State
     fun isBtOn() : Boolean{
         return mBluetoothAdapter.isEnabled
     }
 
+    fun getPaired() : Set<BluetoothDevice> {
+        var pairedDevices:  Set<BluetoothDevice> = mutableSetOf()
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            pairedDevices = mBluetoothAdapter?.bondedDevices!!
+            pairedDevices.forEach{
+                Log.d("Paired Devices","$it")
+            }
+        }
+
+        return pairedDevices ?: mutableSetOf()
+    }
 }
