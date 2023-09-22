@@ -4,5 +4,6 @@ import android.bluetooth.BluetoothDevice
 
 data class ScreenState(
     var btState: Boolean = false,
-    var pairedDevicesList: Set<BluetoothDevice> = mutableSetOf()
+    var pairedDevicesList: Set<BluetoothDevice> = mutableSetOf(),
+    var availableDeviceList : Set<BluetoothDevice> = mutableSetOf()
 )

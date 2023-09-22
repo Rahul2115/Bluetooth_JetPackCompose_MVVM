@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -49,6 +50,20 @@ class BtActions(private val context:Context) {
         return mBluetoothAdapter.isEnabled
     }
 
+    fun discoverDevices() {
+        Log.d("Discover","Started")
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            if (mBluetoothAdapter.isDiscovering) {
+                mBluetoothAdapter.cancelDiscovery()
+            }
+            mBluetoothAdapter.startDiscovery()
+        }
+    }
+
     fun getPaired() : Set<BluetoothDevice> {
         var pairedDevices:  Set<BluetoothDevice> = mutableSetOf()
         if (ActivityCompat.checkSelfPermission(
@@ -61,7 +76,6 @@ class BtActions(private val context:Context) {
                 Log.d("Paired Devices","$it")
             }
         }
-
         return pairedDevices ?: mutableSetOf()
     }
 }

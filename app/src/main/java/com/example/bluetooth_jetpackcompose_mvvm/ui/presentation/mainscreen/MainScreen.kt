@@ -61,7 +61,20 @@ fun MainScreen(
                 items(uiState.pairedDevicesList.toList()){
                     BtPairedDevices(it,viewModel)
                 }
+
+                item {
+                    Text(
+                        text = "Available Devices",
+                        fontSize = 18.sp,
+                        modifier = Modifier
+                            .padding(start = 20.dp, top = 10.dp, bottom = 15.dp)
+                    )
+                }
+                items(uiState.availableDeviceList.toList()){
+                    availableDevices(device = it, viewModel = viewModel)
+                }
             }
+
         }
     }
 }
@@ -119,7 +132,7 @@ fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
         )
         .height(50.dp)
         .clickable {
-            Log.d("Tag","Connect to device")
+            Log.d("Tag", "Connect to device")
         }) {
 
         displayIcon(
@@ -147,14 +160,50 @@ fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
                 .align(Alignment.CenterVertically)
                 .clickable {
                     try {
-                            viewModel.deletePaired(device)
+                        viewModel.deletePaired(device)
                     } catch (e: Exception) {
-                        Log.d("Tag","Delete paired device")
+                        Log.d("Tag", "Delete paired device")
                     }
                 }
         )
     }
 }
+
+@Composable
+fun availableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
+    Row(
+        modifier = Modifier
+            .padding(
+                start = 20.dp, top = 5.dp, bottom = 10.dp, end = 20.dp
+            )
+            .height(50.dp)
+            .clickable {
+                Log.d("Tag", "Pair device")
+            }
+    ) {
+
+        displayIcon(
+            device = viewModel.deviceToString(device,1),
+            modifier = Modifier
+                .size(24.dp)
+                .align(Alignment.CenterVertically)
+        )
+
+        Text(
+            //text = "${BtObject.devices.value.elementAt(it).name}+${BtObject.devices.value.elementAt(it).bluetoothClass}",
+            text = viewModel.deviceToString(device,2),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Light,
+            modifier = Modifier
+                .padding(start = 10.dp)
+                .align(Alignment.CenterVertically)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+    }
+
+}
+
 
 @Composable
 fun displayIcon(device: String, modifier: Modifier){

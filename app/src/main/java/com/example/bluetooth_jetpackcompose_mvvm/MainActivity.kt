@@ -2,6 +2,7 @@ package com.example.bluetooth_jetpackcompose_mvvm
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
@@ -31,10 +32,20 @@ class MainActivity : ComponentActivity() {
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
         registerReceiver(viewModel.broadCastReceiver,intentFilter)
 
+        // Register for broadcasts when a device is discovered.
+        val filter = IntentFilter()
+        filter.addAction(BluetoothDevice.ACTION_FOUND)
+        registerReceiver(viewModel.btDeviceReceiver, filter)
+
         setContent {
             Bluetooth_JetPackCompose_MVVMTheme {
                 MainScreen(viewModel = viewModel)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getPairedDevices()
     }
 }

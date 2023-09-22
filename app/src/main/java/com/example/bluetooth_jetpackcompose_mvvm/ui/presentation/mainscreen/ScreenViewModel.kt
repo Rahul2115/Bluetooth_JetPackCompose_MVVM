@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
+@Suppress("DEPRECATION")
 @HiltViewModel
 class ScreenViewModel @Inject constructor(
     private val btAction : BtActions,
@@ -61,6 +62,23 @@ class ScreenViewModel @Inject constructor(
             btAction.changeBtAction()
     }
 
+    fun getAvailableDevices() {
+        btAction.discoverDevices()
+    }
+
+    fun getPairedDevices(){
+        if(btAction.isBtOn())
+        {
+            _state.update { screenState ->
+                screenState.copy(pairedDevicesList = btAction.getPaired() )
+            }
+        }else{
+            _state.update { screenState ->
+                screenState.copy(pairedDevicesList = mutableSetOf())
+            }
+        }
+    }
+
     //BroadCast Receiver which receives bluetooth Action Changed
     val broadCastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
@@ -72,6 +90,31 @@ class ScreenViewModel @Inject constructor(
             }else{
                 _state.update { screenState ->
                     screenState.copy(btState = false, pairedDevicesList = mutableSetOf())
+                }
+            }
+        }
+    }
+
+    val btDeviceReceiver = object : BroadcastReceiver() {
+        override fun onReceive(contxt: Context?, intent: Intent?) {
+            val action: String? = intent?.action
+
+            when(action) {
+                BluetoothDevice.ACTION_FOUND -> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                    if (ActivityCompat.checkSelfPermission(
+                            app,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        if (device?.name != null) {
+                            if(device !in _state.value.pairedDevicesList)
+                            {
+                                _state.value.availableDeviceList = _state.value.availableDeviceList + device
+                            }
+                        }
+                    }
                 }
             }
         }
