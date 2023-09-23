@@ -1,7 +1,6 @@
 package com.example.bluetooth_jetpackcompose_mvvm.di
 
 import android.app.Application
-import com.example.bluetooth_jetpackcompose_mvvm.MyBt
 import com.example.bluetoothmodule.BtActions
 import dagger.Module
 import dagger.Provides

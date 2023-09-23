@@ -2,11 +2,13 @@ package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
 
 import android.Manifest
 import android.app.Application
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import com.example.bluetoothmodule.BtActions
@@ -29,6 +31,11 @@ class ScreenViewModel @Inject constructor(
     init{
         _state.value.btState = btAction.isBtOn()
         _state.value.pairedDevicesList = btAction.getPaired()
+        _state.value.deviceName = btAction.getDeviceName()
+    }
+
+    fun setBtName(name : String){
+        btAction.setDeviceName(name)
     }
 
     fun deviceToString(device: BluetoothDevice,code: Int) : String{
@@ -63,7 +70,14 @@ class ScreenViewModel @Inject constructor(
     }
 
     fun getAvailableDevices() {
+        _state.update { screenState ->
+            screenState.copy(availableDeviceList = mutableSetOf())
+        }
         btAction.discoverDevices()
+    }
+
+    fun cancelDiscovery(){
+        btAction.cancelDiscovery()
     }
 
     fun getPairedDevices(){
@@ -88,18 +102,25 @@ class ScreenViewModel @Inject constructor(
                     screenState.copy(btState = true, pairedDevicesList = btAction.getPaired() )
                 }
             }else{
+                cancelDiscovery()
                 _state.update { screenState ->
-                    screenState.copy(btState = false, pairedDevicesList = mutableSetOf())
+                    screenState.copy(btState = false, pairedDevicesList = mutableSetOf(), availableDeviceList = mutableSetOf(), discoverState = false)
                 }
+            }
+        }
+    }
+
+    val nameReceiver = object : BroadcastReceiver() {
+        override fun onReceive(contxt: Context?, intent: Intent?) {
+            _state.update { screenState ->
+                screenState.copy( deviceName = btAction.getDeviceName())
             }
         }
     }
 
     val btDeviceReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
-            val action: String? = intent?.action
-
-            when(action) {
+            when(intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
                     val device: BluetoothDevice? =
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
@@ -111,8 +132,29 @@ class ScreenViewModel @Inject constructor(
                         if (device?.name != null) {
                             if(device !in _state.value.pairedDevicesList)
                             {
-                                _state.value.availableDeviceList = _state.value.availableDeviceList + device
+                                _state.update { screenState ->
+                                    screenState.copy(availableDeviceList = _state.value.availableDeviceList + device )
+                                }
                             }
+                        }
+                    }
+                }
+
+                BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
+                    Log.d("Discovery","Started")
+                    if(btAction.isDiscovering()){
+                        _state.update { screenState ->
+                            screenState.copy(discoverState = true)
+                        }
+                    }
+                }
+
+                BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                    Log.d("Discovery","Finished")
+
+                    if(!btAction.isDiscovering()){
+                        _state.update { screenState ->
+                            screenState.copy(discoverState = false)
                         }
                     }
                 }

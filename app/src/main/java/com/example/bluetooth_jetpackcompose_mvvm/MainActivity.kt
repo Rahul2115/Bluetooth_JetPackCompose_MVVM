@@ -35,11 +35,19 @@ class MainActivity : ComponentActivity() {
         // Register for broadcasts when a device is discovered.
         val filter = IntentFilter()
         filter.addAction(BluetoothDevice.ACTION_FOUND)
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
         registerReceiver(viewModel.btDeviceReceiver, filter)
+
+        val nameFilter = IntentFilter()
+        nameFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)
+        registerReceiver(viewModel.nameReceiver,nameFilter)
+
+
 
         setContent {
             Bluetooth_JetPackCompose_MVVMTheme {
-                MainScreen(viewModel = viewModel)
+                Navigation(viewModel = viewModel)
             }
         }
     }
