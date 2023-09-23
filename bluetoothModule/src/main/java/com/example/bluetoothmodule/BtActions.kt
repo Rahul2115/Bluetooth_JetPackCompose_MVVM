@@ -118,4 +118,21 @@ class BtActions(private val context:Context) {
         }
         mBluetoothAdapter.name = name
     }
+
+    fun makeDiscover(){
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            if (!mBluetoothAdapter.isDiscovering) {
+                val discoverableIntent: Intent =
+                    Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                        putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 30)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                context.startActivity(discoverableIntent)
+            }
+        }
+    }
 }

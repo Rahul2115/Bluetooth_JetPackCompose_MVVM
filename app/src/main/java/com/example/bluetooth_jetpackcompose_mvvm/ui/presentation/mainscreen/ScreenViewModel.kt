@@ -38,6 +38,10 @@ class ScreenViewModel @Inject constructor(
         btAction.setDeviceName(name)
     }
 
+    fun makeDeviceDiscover(){
+        btAction.makeDiscover()
+    }
+
     fun deviceToString(device: BluetoothDevice,code: Int) : String{
         if (ActivityCompat.checkSelfPermission(
                 app,
