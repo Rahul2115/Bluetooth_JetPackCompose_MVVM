@@ -60,7 +60,8 @@ fun MainScreen(viewModel: ScreenViewModel,navController: NavController,uiState: 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(paddingValues).padding(top = 20.dp)
+                .padding(paddingValues)
+                .padding(top = 20.dp)
         ) {
             BtHeader(viewModel, uiState)
 
@@ -296,6 +297,7 @@ fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
             )
             .height(50.dp)
             .clickable {
+                viewModel.connect(device)
                 Log.d("Tag", "Pair device")
             }
     ) {
@@ -308,7 +310,6 @@ fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
         )
 
         Text(
-            //text = "${BtObject.devices.value.elementAt(it).name}+${BtObject.devices.value.elementAt(it).bluetoothClass}",
             text = viewModel.deviceToString(device,2),
             fontSize = 20.sp,
             fontWeight = FontWeight.Light,

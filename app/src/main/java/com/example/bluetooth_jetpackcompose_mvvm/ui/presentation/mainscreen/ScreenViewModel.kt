@@ -1,6 +1,7 @@
 package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -42,6 +43,12 @@ class ScreenViewModel @Inject constructor(
         btAction.makeDiscover()
     }
 
+    @SuppressLint("MissingPermission")
+    fun connect(device: BluetoothDevice){
+        val pairState = device.createBond()
+        Log.d("PairedState","$pairState")
+    }
+
     fun deviceToString(device: BluetoothDevice,code: Int) : String{
         if (ActivityCompat.checkSelfPermission(
                 app,
@@ -64,7 +71,7 @@ class ScreenViewModel @Inject constructor(
     fun deletePaired(device: BluetoothDevice){
         device.javaClass.getMethod("removeBond").invoke(device)
         _state.update { screenState ->
-            screenState.copy(pairedDevicesList = _state.value.pairedDevicesList - device )
+            screenState.copy(pairedDevicesList = _state.value.pairedDevicesList - device)
         }
     }
 
@@ -118,6 +125,24 @@ class ScreenViewModel @Inject constructor(
         override fun onReceive(contxt: Context?, intent: Intent?) {
             _state.update { screenState ->
                 screenState.copy( deviceName = btAction.getDeviceName())
+            }
+        }
+    }
+
+    val pairingReceiver = object : BroadcastReceiver() {
+        override fun onReceive(contxt: Context?, intent: Intent?) {
+            when(intent?.action) {
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED-> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
+                    if(device!=null){
+                        _state.update { screenState ->
+                            screenState.copy(pairedDevicesList = btAction.getPaired(),availableDeviceList = _state.value.availableDeviceList - device)
+                        }
+                    }
+
+                }
             }
         }
     }

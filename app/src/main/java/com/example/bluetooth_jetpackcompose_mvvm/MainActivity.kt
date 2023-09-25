@@ -42,6 +42,9 @@ class MainActivity : ComponentActivity() {
         nameFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)
         registerReceiver(viewModel.nameReceiver,nameFilter)
 
+        val pairingFilter = IntentFilter()
+        pairingFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        registerReceiver(viewModel.pairingReceiver,pairingFilter)
 
 
         setContent {
