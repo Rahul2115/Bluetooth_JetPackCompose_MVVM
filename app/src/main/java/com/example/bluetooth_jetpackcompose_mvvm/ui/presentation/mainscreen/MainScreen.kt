@@ -67,7 +67,7 @@ fun MainScreen(viewModel: ScreenViewModel,navController: NavController,uiState: 
 
             BtSwitch(viewModel = viewModel, uiState = uiState)
 
-            DeviceName(uiState, navController)
+            DeviceName(uiState, navController,viewModel)
 
             if (uiState.btState) {
                 LazyColumn {
@@ -196,13 +196,17 @@ fun BtSwitch(viewModel:ScreenViewModel,uiState:ScreenState){
 }
 
 @Composable
-fun DeviceName(uiState: ScreenState,navController: NavController){
+fun DeviceName(uiState: ScreenState,navController: NavController,viewModel: ScreenViewModel){
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 25.dp, start = 10.dp)
             .clickable {
-                navController.navigate("nameScreen")
+                if(uiState.btState){
+                    navController.navigate("nameScreen")
+                }else{
+                    viewModel.toast("Turn on Bluetooth to continue.")
+                }
             }
     ) {
 
@@ -235,9 +239,6 @@ fun DeviceName(uiState: ScreenState,navController: NavController){
                 .size(35.dp)
                 .align(Alignment.CenterVertically)
                 .padding(end = 20.dp)
-                .clickable {
-
-                }
         )
     }
 }
@@ -298,8 +299,7 @@ fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
             .height(50.dp)
             .clickable {
                 viewModel.connect(device)
-                Log.d("Tag", "Pair device")
-            }
+            }.fillMaxWidth()
     ) {
 
         DisplayIcon(

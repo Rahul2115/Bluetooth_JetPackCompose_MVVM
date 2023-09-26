@@ -29,23 +29,12 @@ class MainActivity : ComponentActivity() {
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND)
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        intentFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)
         registerReceiver(viewModel.broadCastReceiver,intentFilter)
-
-        // Register for broadcasts when a device is discovered.
-        val filter = IntentFilter()
-        filter.addAction(BluetoothDevice.ACTION_FOUND)
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
-        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
-        registerReceiver(viewModel.btDeviceReceiver, filter)
-
-        val nameFilter = IntentFilter()
-        nameFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)
-        registerReceiver(viewModel.nameReceiver,nameFilter)
-
-        val pairingFilter = IntentFilter()
-        pairingFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        registerReceiver(viewModel.pairingReceiver,pairingFilter)
-
 
         setContent {
             Bluetooth_JetPackCompose_MVVMTheme {
@@ -57,5 +46,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.getPairedDevices()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(viewModel.broadCastReceiver)
     }
 }

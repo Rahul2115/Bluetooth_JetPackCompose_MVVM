@@ -10,6 +10,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
 import com.example.bluetoothmodule.BtActions
@@ -29,46 +30,46 @@ class ScreenViewModel @Inject constructor(
     private val _state = MutableStateFlow(ScreenState())
     val state: StateFlow<ScreenState> = _state.asStateFlow()
 
-    init{
+    init {
         _state.value.btState = btAction.isBtOn()
         _state.value.pairedDevicesList = btAction.getPaired()
         _state.value.deviceName = btAction.getDeviceName()
     }
 
-    fun setBtName(name : String){
+    fun setBtName(name: String) {
         btAction.setDeviceName(name)
     }
 
-    fun makeDeviceDiscover(){
+    fun toast(message: String) {
+        Toast.makeText(app, message, Toast.LENGTH_LONG).show()
+    }
+
+    fun makeDeviceDiscover() {
         btAction.makeDiscover()
     }
 
     @SuppressLint("MissingPermission")
-    fun connect(device: BluetoothDevice){
-        val pairState = device.createBond()
-        Log.d("PairedState","$pairState")
+    fun connect(device: BluetoothDevice) {
+        device.createBond()
     }
 
-    fun deviceToString(device: BluetoothDevice,code: Int) : String{
+    fun deviceToString(device: BluetoothDevice, code: Int): String {
         if (ActivityCompat.checkSelfPermission(
                 app,
                 Manifest.permission.BLUETOOTH_CONNECT
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-
+            Log.d("Tag","Permission Not given")
         }
 
-        if(code == 2)
-            return device.name.toString()
-
-        else if(code == 1)
-            return device.bluetoothClass.toString()
-
-        else
-            return device.toString()
+        return when(code){
+            2 -> device.name.toString()
+            1 -> device.bluetoothClass.toString()
+            else -> device.toString()
+        }
     }
 
-    fun deletePaired(device: BluetoothDevice){
+    fun deletePaired(device: BluetoothDevice) {
         device.javaClass.getMethod("removeBond").invoke(device)
         _state.update { screenState ->
             screenState.copy(pairedDevicesList = _state.value.pairedDevicesList - device)
@@ -76,8 +77,8 @@ class ScreenViewModel @Inject constructor(
     }
 
     //This Function call the function in Bluetooth module to turn on Bluetooth
-    fun btActionChange(){
-            btAction.changeBtAction()
+    fun btActionChange() {
+        btAction.changeBtAction()
     }
 
     fun getAvailableDevices() {
@@ -87,69 +88,48 @@ class ScreenViewModel @Inject constructor(
         btAction.discoverDevices()
     }
 
-    fun cancelDiscovery(){
+    fun cancelDiscovery() {
         btAction.cancelDiscovery()
     }
 
-    fun getPairedDevices(){
-        if(btAction.isBtOn())
-        {
+    fun getPairedDevices() {
+        if (btAction.isBtOn()) {
             _state.update { screenState ->
-                screenState.copy(pairedDevicesList = btAction.getPaired() )
+                screenState.copy(pairedDevicesList = btAction.getPaired())
             }
-        }else{
+        } else {
             _state.update { screenState ->
                 screenState.copy(pairedDevicesList = mutableSetOf())
             }
         }
     }
 
-    //BroadCast Receiver which receives bluetooth Action Changed
+    //BroadCast Receiver
     val broadCastReceiver = object : BroadcastReceiver() {
         override fun onReceive(contxt: Context?, intent: Intent?) {
-            if(btAction.isBtOn())
-            {
-                _state.update { screenState ->
-                    screenState.copy(btState = true, pairedDevicesList = btAction.getPaired() )
-                }
-            }else{
-                cancelDiscovery()
-                _state.update { screenState ->
-                    screenState.copy(btState = false, pairedDevicesList = mutableSetOf(), availableDeviceList = mutableSetOf(), discoverState = false)
-                }
-            }
-        }
-    }
-
-    val nameReceiver = object : BroadcastReceiver() {
-        override fun onReceive(contxt: Context?, intent: Intent?) {
-            _state.update { screenState ->
-                screenState.copy( deviceName = btAction.getDeviceName())
-            }
-        }
-    }
-
-    val pairingReceiver = object : BroadcastReceiver() {
-        override fun onReceive(contxt: Context?, intent: Intent?) {
-            when(intent?.action) {
-                BluetoothDevice.ACTION_BOND_STATE_CHANGED-> {
-                    val device: BluetoothDevice? =
-                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-
-                    if(device!=null){
+            when (intent?.action) {
+                BluetoothAdapter.ACTION_STATE_CHANGED -> {
+                    if (btAction.isBtOn()) {
                         _state.update { screenState ->
-                            screenState.copy(pairedDevicesList = btAction.getPaired(),availableDeviceList = _state.value.availableDeviceList - device)
+                            screenState.copy(
+                                btState = true,
+                                pairedDevicesList = btAction.getPaired()
+                            )
+                        }
+                        getAvailableDevices()
+                    } else {
+                        cancelDiscovery()
+                        _state.update { screenState ->
+                            screenState.copy(
+                                btState = false,
+                                pairedDevicesList = mutableSetOf(),
+                                availableDeviceList = mutableSetOf(),
+                                discoverState = false
+                            )
                         }
                     }
-
                 }
-            }
-        }
-    }
 
-    val btDeviceReceiver = object : BroadcastReceiver() {
-        override fun onReceive(contxt: Context?, intent: Intent?) {
-            when(intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
                     val device: BluetoothDevice? =
                         intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
@@ -159,10 +139,9 @@ class ScreenViewModel @Inject constructor(
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
                         if (device?.name != null) {
-                            if(device !in _state.value.pairedDevicesList)
-                            {
+                            if (device !in _state.value.pairedDevicesList) {
                                 _state.update { screenState ->
-                                    screenState.copy(availableDeviceList = _state.value.availableDeviceList + device )
+                                    screenState.copy(availableDeviceList = _state.value.availableDeviceList + device)
                                 }
                             }
                         }
@@ -170,8 +149,8 @@ class ScreenViewModel @Inject constructor(
                 }
 
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
-                    Log.d("Discovery","Started")
-                    if(btAction.isDiscovering()){
+                    Log.d("Discovery", "Started")
+                    if (btAction.isDiscovering()) {
                         _state.update { screenState ->
                             screenState.copy(discoverState = true)
                         }
@@ -179,16 +158,37 @@ class ScreenViewModel @Inject constructor(
                 }
 
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                    Log.d("Discovery","Finished")
+                    Log.d("Discovery", "Finished")
 
-                    if(!btAction.isDiscovering()){
+                    if (!btAction.isDiscovering()) {
                         _state.update { screenState ->
                             screenState.copy(discoverState = false)
                         }
                     }
                 }
+
+                BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED -> {
+                    _state.update { screenState ->
+                        screenState.copy(deviceName = btAction.getDeviceName())
+                    }
+                }
+
+                BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
+                    val device: BluetoothDevice? =
+                        intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+
+                    if (device != null) {
+                        _state.update { screenState ->
+                            screenState.copy(
+                                pairedDevicesList = btAction.getPaired(),
+                                availableDeviceList = _state.value.availableDeviceList - device
+                            )
+                        }
+                    }
+
+                }
+
             }
         }
     }
-
 }
