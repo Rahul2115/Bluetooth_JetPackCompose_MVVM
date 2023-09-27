@@ -1,13 +1,12 @@
 package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
 
-import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import android.content.pm.PackageManager
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,11 +17,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,63 +31,115 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
+import androidx.navigation.NavController
 import com.example.bluetooth_jetpackcompose_mvvm.R
 
 
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MainScreen(
-    viewModel: ScreenViewModel
-) {
-    val uiState by viewModel.state.collectAsState()
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 10.dp, top = 15.dp, bottom = 15.dp)
-    ) {
-        BtHeader()
-        BtSwitch(viewModel = viewModel, uiState = uiState)
-        if(uiState.btState)
-        {
-            LazyColumn{
-                item{
-                    Text(
-                        text = "Paired Devices",
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .padding(start = 20.dp, top = 30.dp, bottom = 10.dp)
-                    )
-                }
-
-                items(uiState.pairedDevicesList.toList()){
-                    BtPairedDevices(it,viewModel)
-                }
-
-                item {
-                    Text(
-                        text = "Available Devices",
-                        fontSize = 18.sp,
-                        modifier = Modifier
-                            .padding(start = 20.dp, top = 10.dp, bottom = 15.dp)
-                    )
-                }
-                items(uiState.availableDeviceList.toList()){
-                    availableDevices(device = it, viewModel = viewModel)
+fun MainScreen(viewModel: ScreenViewModel,navController: NavController,uiState: ScreenState) {
+    Scaffold(
+        bottomBar = {
+            if(uiState.btState){
+                Column(
+                    Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Divider(color = Color.LightGray, thickness = 2.dp)
+                    Button(onClick = { viewModel.makeDeviceDiscover()
+                                     },
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
+                        Text(text = "Make Discoverable")
+                    }
                 }
             }
+        }
+    ) {paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingValues)
+                .padding(top = 20.dp)
+        ) {
+            BtHeader(viewModel, uiState)
 
+            BtSwitch(viewModel = viewModel, uiState = uiState)
+
+            DeviceName(uiState, navController,viewModel)
+
+            if (uiState.btState) {
+                LazyColumn {
+                    item {
+                        Text(
+                            text = "Paired Devices",
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .padding(start = 20.dp, top = 30.dp, bottom = 10.dp)
+                        )
+                    }
+
+                    if (uiState.pairedDevicesList.isNotEmpty()) {
+                        items(uiState.pairedDevicesList.toList()) {
+                            BtPairedDevices(it, viewModel)
+                        }
+                    } else {
+                        item {
+                            Text(
+                                text = "No paired devices found",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Light,
+                                modifier = Modifier
+                                    .padding(
+                                        start = 20.dp,
+                                    )
+                                    .height(50.dp)
+                            )
+                        }
+                    }
+
+                    item {
+                        Text(
+                            text = "Available Devices",
+                            fontSize = 18.sp,
+                            modifier = Modifier
+                                .padding(start = 20.dp, top = 10.dp, bottom = 15.dp)
+                        )
+                    }
+
+                    if (uiState.availableDeviceList.isNotEmpty()) {
+                        items(uiState.availableDeviceList.toList()) {
+                            AvailableDevices(device = it, viewModel = viewModel)
+                        }
+                    } else {
+                        item {
+                            Text(
+                                text = "No devices found",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Light,
+                                modifier = Modifier
+                                    .padding(
+                                        start = 20.dp,
+                                    )
+                                    .height(50.dp)
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 
 @Composable
-fun BtHeader(){
+fun BtHeader(viewModel:ScreenViewModel,uiState:ScreenState){
     Row(
         modifier = Modifier.padding(
             start = 10.dp,
             top = 5.dp,
-            bottom = 5.dp,
+            bottom = 15.dp,
             end = 20.dp
         )
     ) {
@@ -94,6 +147,24 @@ fun BtHeader(){
             text = "Bluetooth",
             fontSize = 35.sp, fontWeight = FontWeight.Medium
         )
+
+        if(uiState.btState){
+            Spacer(modifier = Modifier.weight(1f))
+
+            if(!uiState.discoverState) {
+                Button(onClick = { viewModel.getAvailableDevices()
+                }) {
+                    Text(text = "Scan")
+                }
+
+            }else{
+                Button(onClick = {
+                    viewModel.cancelDiscovery()
+                }) {
+                    Text(text = "Stop")
+                }
+            }
+        }
     }
 }
 
@@ -125,6 +196,55 @@ fun BtSwitch(viewModel:ScreenViewModel,uiState:ScreenState){
 }
 
 @Composable
+fun DeviceName(uiState: ScreenState,navController: NavController,viewModel: ScreenViewModel){
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 25.dp, start = 10.dp)
+            .clickable {
+                if(uiState.btState){
+                    navController.navigate("nameScreen")
+                }else{
+                    viewModel.toast("Turn on Bluetooth to continue.")
+                }
+            }
+    ) {
+
+        Text(
+            text = "Device name",
+            fontSize = 18.sp,
+            modifier = Modifier
+                .padding(
+                    start = 10.dp,
+                )
+                .align(Alignment.CenterVertically)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = uiState.deviceName ,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .padding(
+                    start = 10.dp, end = 10.dp
+                )
+                .align(Alignment.CenterVertically)
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.rightarrow),
+            contentDescription = null,
+            modifier = Modifier
+                .size(35.dp)
+                .align(Alignment.CenterVertically)
+                .padding(end = 20.dp)
+        )
+    }
+}
+
+
+@Composable
 fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
     Row(modifier = Modifier
         .padding(
@@ -135,7 +255,7 @@ fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
             Log.d("Tag", "Connect to device")
         }) {
 
-        displayIcon(
+        DisplayIcon(
             device = viewModel.deviceToString(device,1),
             modifier = Modifier
                 .size(26.dp)
@@ -170,7 +290,7 @@ fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
 }
 
 @Composable
-fun availableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
+fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
     Row(
         modifier = Modifier
             .padding(
@@ -178,11 +298,11 @@ fun availableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
             )
             .height(50.dp)
             .clickable {
-                Log.d("Tag", "Pair device")
-            }
+                viewModel.connect(device)
+            }.fillMaxWidth()
     ) {
 
-        displayIcon(
+        DisplayIcon(
             device = viewModel.deviceToString(device,1),
             modifier = Modifier
                 .size(24.dp)
@@ -190,7 +310,6 @@ fun availableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
         )
 
         Text(
-            //text = "${BtObject.devices.value.elementAt(it).name}+${BtObject.devices.value.elementAt(it).bluetoothClass}",
             text = viewModel.deviceToString(device,2),
             fontSize = 20.sp,
             fontWeight = FontWeight.Light,
@@ -198,15 +317,13 @@ fun availableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
                 .padding(start = 10.dp)
                 .align(Alignment.CenterVertically)
         )
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 
 }
 
 
 @Composable
-fun displayIcon(device: String, modifier: Modifier){
+fun DisplayIcon(device: String, modifier: Modifier){
     when (device) {
         "240404" -> Image(
             painter = painterResource(id = R.drawable.headphones),

@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
@@ -50,8 +49,18 @@ class BtActions(private val context:Context) {
         return mBluetoothAdapter.isEnabled
     }
 
+    fun isDiscovering() : Boolean{
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+        return mBluetoothAdapter.isDiscovering
+    }
+
     fun discoverDevices() {
-        Log.d("Discover","Started")
         if (ActivityCompat.checkSelfPermission(
                 context,
                 Manifest.permission.BLUETOOTH_SCAN
@@ -61,7 +70,19 @@ class BtActions(private val context:Context) {
                 mBluetoothAdapter.cancelDiscovery()
             }
             mBluetoothAdapter.startDiscovery()
+            Log.d("Discover", mBluetoothAdapter.isDiscovering.toString())
         }
+    }
+
+    fun cancelDiscovery(){
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        mBluetoothAdapter.cancelDiscovery()
     }
 
     fun getPaired() : Set<BluetoothDevice> {
@@ -71,11 +92,48 @@ class BtActions(private val context:Context) {
                 Manifest.permission.BLUETOOTH_CONNECT
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            pairedDevices = mBluetoothAdapter?.bondedDevices!!
-            pairedDevices.forEach{
-                Log.d("Paired Devices","$it")
+            pairedDevices = mBluetoothAdapter.bondedDevices!!
+        }
+        return pairedDevices
+    }
+
+    fun getDeviceName() : String {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return ""
+        }
+        return mBluetoothAdapter.name
+    }
+
+    fun setDeviceName(name:String){
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        mBluetoothAdapter.name = name
+    }
+
+    fun makeDiscover(){
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            if (!mBluetoothAdapter.isDiscovering) {
+                val discoverableIntent: Intent =
+                    Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+                        putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 30)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                context.startActivity(discoverableIntent)
             }
         }
-        return pairedDevices ?: mutableSetOf()
     }
+
 }

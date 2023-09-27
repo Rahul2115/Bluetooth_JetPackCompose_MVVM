@@ -11,7 +11,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
-import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.MainScreen
 import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.ScreenViewModel
 import com.example.bluetooth_jetpackcompose_mvvm.ui.theme.Bluetooth_JetPackCompose_MVVMTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,16 +29,16 @@ class MainActivity : ComponentActivity() {
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        intentFilter.addAction(BluetoothDevice.ACTION_FOUND)
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
+        intentFilter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
+        intentFilter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
+        intentFilter.addAction(BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED)
         registerReceiver(viewModel.broadCastReceiver,intentFilter)
-
-        // Register for broadcasts when a device is discovered.
-        val filter = IntentFilter()
-        filter.addAction(BluetoothDevice.ACTION_FOUND)
-        registerReceiver(viewModel.btDeviceReceiver, filter)
 
         setContent {
             Bluetooth_JetPackCompose_MVVMTheme {
-                MainScreen(viewModel = viewModel)
+                Navigation(viewModel = viewModel)
             }
         }
     }
@@ -47,5 +46,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.getPairedDevices()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(viewModel.broadCastReceiver)
     }
 }
