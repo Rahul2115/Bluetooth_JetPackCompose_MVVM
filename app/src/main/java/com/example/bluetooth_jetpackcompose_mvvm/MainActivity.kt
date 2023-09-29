@@ -25,7 +25,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         ActivityCompat.requestPermissions(this, arrayOf(
             Manifest.permission.BLUETOOTH_CONNECT,
-            Manifest.permission.BLUETOOTH_SCAN),0)
+            Manifest.permission.BLUETOOTH_SCAN,
+            Manifest.permission.RECORD_AUDIO),0)
 
         val intentFilter = IntentFilter()
         intentFilter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED)

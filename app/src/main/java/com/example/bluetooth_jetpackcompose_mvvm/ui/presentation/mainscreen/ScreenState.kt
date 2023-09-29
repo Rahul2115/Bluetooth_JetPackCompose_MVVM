@@ -7,5 +7,5 @@ data class ScreenState(
     var discoverState: Boolean = false,
     var pairedDevicesList: Set<BluetoothDevice> = mutableSetOf(),
     var availableDeviceList: Set<BluetoothDevice> = mutableSetOf(),
-    var deviceName: String = ""
+    var deviceName: String = "",
 )

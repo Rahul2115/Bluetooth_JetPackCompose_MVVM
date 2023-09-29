@@ -1,5 +1,7 @@
 package com.example.bluetooth_jetpackcompose_mvvm
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -10,6 +12,7 @@ import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.Main
 import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.NameScreen
 import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.ScreenViewModel
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun Navigation(viewModel: ScreenViewModel) {
     val navController = rememberNavController()

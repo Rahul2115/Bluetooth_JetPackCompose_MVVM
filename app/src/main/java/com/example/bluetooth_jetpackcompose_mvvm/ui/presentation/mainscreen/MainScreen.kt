@@ -2,10 +2,14 @@ package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,10 +24,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,25 +43,76 @@ import androidx.navigation.NavController
 import com.example.bluetooth_jetpackcompose_mvvm.R
 
 
+@RequiresApi(Build.VERSION_CODES.R)
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(viewModel: ScreenViewModel,navController: NavController,uiState: ScreenState) {
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
     Scaffold(
         bottomBar = {
-            if(uiState.btState){
-                Column(
-                    Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+            Column(
+                Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Divider(color = Color.LightGray, thickness = 2.dp)
+
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                    //modifier = Modifier.fillMaxWidth()
                 ) {
-                    Divider(color = Color.LightGray, thickness = 2.dp)
-                    Button(onClick = { viewModel.makeDeviceDiscover()
-                                     },
-                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)) {
-                        Text(text = "Make Discoverable")
+                    Spacer(
+                        Modifier
+                            .weight(4f)
+                            .background(Color.Red))
+                    if (uiState.btState) {
+                        Button(
+                            onClick = {
+                                viewModel.makeDeviceDiscover()
+                            },
+                            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp)
+                        ) {
+                            Text(text = "Make Discoverable")
+                        }
                     }
+
+                    Spacer(
+                        Modifier
+                            .weight(1f)
+                            .background(Color.Green))
+
+                    IconButton(onClick = {},interactionSource = interactionSource) {
+                        if(isPressed){
+                            Log.d("Voice","Listening")
+                            Icon(
+                                painter = painterResource(id = R.drawable.microphone),
+                                contentDescription = null,
+                            )
+
+                            viewModel.startListen()
+                        }else{
+                            Icon(
+                                painter = painterResource(id = R.drawable.mic),
+                                contentDescription = null,
+                            )
+                            viewModel.speechRecognizer.stopListening()
+                        }
+
+                    }
+
+                    Spacer(
+                        Modifier
+                            .weight(1f)
+                            .background(Color.Green))
+
                 }
+
             }
         }
     ) {paddingValues ->
@@ -152,7 +211,8 @@ fun BtHeader(viewModel:ScreenViewModel,uiState:ScreenState){
             Spacer(modifier = Modifier.weight(1f))
 
             if(!uiState.discoverState) {
-                Button(onClick = { viewModel.getAvailableDevices()
+                Button(onClick = {
+                    viewModel.getAvailableDevices()
                 }) {
                     Text(text = "Scan")
                 }
@@ -202,9 +262,9 @@ fun DeviceName(uiState: ScreenState,navController: NavController,viewModel: Scre
             .fillMaxWidth()
             .padding(top = 25.dp, start = 10.dp)
             .clickable {
-                if(uiState.btState){
+                if (uiState.btState) {
                     navController.navigate("nameScreen")
-                }else{
+                } else {
                     viewModel.toast("Turn on Bluetooth to continue.")
                 }
             }
@@ -244,6 +304,7 @@ fun DeviceName(uiState: ScreenState,navController: NavController,viewModel: Scre
 }
 
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
     Row(modifier = Modifier
@@ -289,6 +350,7 @@ fun BtPairedDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
     Row(
@@ -299,7 +361,8 @@ fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
             .height(50.dp)
             .clickable {
                 viewModel.connect(device)
-            }.fillMaxWidth()
+            }
+            .fillMaxWidth()
     ) {
 
         DisplayIcon(

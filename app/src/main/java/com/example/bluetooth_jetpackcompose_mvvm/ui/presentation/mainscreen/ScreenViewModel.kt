@@ -9,6 +9,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Bundle
+import android.speech.RecognitionListener
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -19,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.util.Locale
 import javax.inject.Inject
 
 @Suppress("DEPRECATION")
@@ -30,10 +35,99 @@ class ScreenViewModel @Inject constructor(
     private val _state = MutableStateFlow(ScreenState())
     val state: StateFlow<ScreenState> = _state.asStateFlow()
 
+
+    val speechRecognizer: SpeechRecognizer by lazy {
+        SpeechRecognizer.createSpeechRecognizer(
+            app
+        )
+    }
+
     init {
         _state.value.btState = btAction.isBtOn()
         _state.value.pairedDevicesList = btAction.getPaired()
         _state.value.deviceName = btAction.getDeviceName()
+    }
+
+    fun startListen() {
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        )
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+        speechRecognizer.setRecognitionListener(object: RecognitionListener {
+            override fun onReadyForSpeech(p0: Bundle?) {
+            }
+
+            override fun onBeginningOfSpeech() {
+            }
+
+            override fun onRmsChanged(p0: Float) {
+
+            }
+
+            override fun onBufferReceived(p0: ByteArray?) {
+
+            }
+
+            override fun onEndOfSpeech() {
+
+            }
+
+            override fun onError(p0: Int) {
+
+            }
+
+            override fun onResults(bundle: Bundle?) {
+                Log.d("Voice Input", "In result")
+                bundle?.let {
+                    val result = it.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+                    result?.get(0)?.let {
+                            it1 -> Log.d("Voice Input", it1)
+                        when(it1.toLowerCase(Locale.getDefault())){
+                            "turn on bluetooth" -> {
+                                if(!state.value.btState){
+                                    btActionChange()
+                                } else {
+
+                                }
+                            }
+                            "turn off bluetooth" -> {
+                                if(state.value.btState){
+                                    btActionChange()
+                                }else{
+
+                                }
+                            }
+
+                            "start scan" -> {
+                                getAvailableDevices()
+                            }
+
+                            "stop scan" -> {
+                                cancelDiscovery()
+                            }
+
+                            "make discoverable" -> {
+                                makeDeviceDiscover()
+                            }
+                            else ->{
+                                Log.d("Voice Input", it1)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onPartialResults(p0: Bundle?) {
+
+            }
+
+            override fun onEvent(p0: Int, p1: Bundle?) {
+
+            }
+        })
+        speechRecognizer.startListening(intent)
     }
 
     fun setBtName(name: String) {
