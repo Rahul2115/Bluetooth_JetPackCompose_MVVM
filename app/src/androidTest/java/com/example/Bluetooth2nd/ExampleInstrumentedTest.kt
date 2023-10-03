@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm
+package com.example.Bluetooth2nd
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.example.bluetooth_jetpackcompose_mvvm", appContext.packageName)
+        assertEquals("com.example.bluetooth", appContext.packageName)
     }
 }

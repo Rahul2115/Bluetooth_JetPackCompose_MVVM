@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm.ui.theme
+package com.example.Bluetooth2nd.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

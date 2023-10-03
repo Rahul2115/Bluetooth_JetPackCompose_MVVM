@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.bluetooth_jetpackcompose_mvvm"
+    namespace = "com.example.Bluetooth2nd"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.bluetooth_jetpackcompose_mvvm"
+        applicationId = "com.example.Bluetooth2nd"
         minSdk = 24
         targetSdk = 33
         versionCode = 1

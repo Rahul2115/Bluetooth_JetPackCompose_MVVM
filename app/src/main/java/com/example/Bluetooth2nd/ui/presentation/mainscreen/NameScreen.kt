@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
+package com.example.Bluetooth2nd.ui.presentation.mainscreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

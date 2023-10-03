@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
+package com.example.Bluetooth2nd.ui.presentation.mainscreen
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -17,7 +17,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModel
-import com.example.bluetoothmodule.BtActions
+import com.example.bluetoothmodule.BluetoothDataSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,7 +29,7 @@ import javax.inject.Inject
 @Suppress("DEPRECATION")
 @HiltViewModel
 class ScreenViewModel @Inject constructor(
-    private val btAction : BtActions,
+    private val btApi : BluetoothDataSource,
     private val app : Application
 ):ViewModel() {
     private val _state = MutableStateFlow(ScreenState())
@@ -43,9 +43,9 @@ class ScreenViewModel @Inject constructor(
     }
 
     init {
-        _state.value.btState = btAction.isBtOn()
-        _state.value.pairedDevicesList = btAction.getPaired()
-        _state.value.deviceName = btAction.getDeviceName()
+        _state.value.btState = btApi.isBtOn()
+        _state.value.pairedDevicesList = btApi.getPaired()
+        _state.value.deviceName = btApi.getDeviceName()
     }
 
     fun startListen() {
@@ -84,6 +84,7 @@ class ScreenViewModel @Inject constructor(
                     val result = it.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                     result?.get(0)?.let {
                             it1 -> Log.d("Voice Input", it1)
+                        Toast.makeText(app, it1, Toast.LENGTH_SHORT).show()
                         when(it1.toLowerCase(Locale.getDefault())){
                             "turn on bluetooth" -> {
                                 if(!state.value.btState){
@@ -131,7 +132,7 @@ class ScreenViewModel @Inject constructor(
     }
 
     fun setBtName(name: String) {
-        btAction.setDeviceName(name)
+        btApi.setDeviceName(name)
     }
 
     fun toast(message: String) {
@@ -139,7 +140,7 @@ class ScreenViewModel @Inject constructor(
     }
 
     fun makeDeviceDiscover() {
-        btAction.makeDiscover()
+        btApi.makeDiscover()
     }
 
     @SuppressLint("MissingPermission")
@@ -172,24 +173,27 @@ class ScreenViewModel @Inject constructor(
 
     //This Function call the function in Bluetooth module to turn on Bluetooth
     fun btActionChange() {
-        btAction.changeBtAction()
+        btApi.changeBtAction()
+        _state.update { screenState ->
+            screenState.copy(deviceName = btApi.getDeviceName())
+        }
     }
 
     fun getAvailableDevices() {
         _state.update { screenState ->
             screenState.copy(availableDeviceList = mutableSetOf())
         }
-        btAction.discoverDevices()
+        btApi.discoverDevices()
     }
 
     fun cancelDiscovery() {
-        btAction.cancelDiscovery()
+        btApi.cancelDiscovery()
     }
 
     fun getPairedDevices() {
-        if (btAction.isBtOn()) {
+        if (btApi.isBtOn()) {
             _state.update { screenState ->
-                screenState.copy(pairedDevicesList = btAction.getPaired())
+                screenState.copy(pairedDevicesList = btApi.getPaired())
             }
         } else {
             _state.update { screenState ->
@@ -203,11 +207,11 @@ class ScreenViewModel @Inject constructor(
         override fun onReceive(contxt: Context?, intent: Intent?) {
             when (intent?.action) {
                 BluetoothAdapter.ACTION_STATE_CHANGED -> {
-                    if (btAction.isBtOn()) {
+                    if (btApi.isBtOn()) {
                         _state.update { screenState ->
                             screenState.copy(
                                 btState = true,
-                                pairedDevicesList = btAction.getPaired()
+                                pairedDevicesList = btApi.getPaired()
                             )
                         }
                         getAvailableDevices()
@@ -244,7 +248,7 @@ class ScreenViewModel @Inject constructor(
 
                 BluetoothAdapter.ACTION_DISCOVERY_STARTED -> {
                     Log.d("Discovery", "Started")
-                    if (btAction.isDiscovering()) {
+                    if (btApi.isDiscovering()) {
                         _state.update { screenState ->
                             screenState.copy(discoverState = true)
                         }
@@ -254,7 +258,7 @@ class ScreenViewModel @Inject constructor(
                 BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
                     Log.d("Discovery", "Finished")
 
-                    if (!btAction.isDiscovering()) {
+                    if (!btApi.isDiscovering()) {
                         _state.update { screenState ->
                             screenState.copy(discoverState = false)
                         }
@@ -263,7 +267,7 @@ class ScreenViewModel @Inject constructor(
 
                 BluetoothAdapter.ACTION_LOCAL_NAME_CHANGED -> {
                     _state.update { screenState ->
-                        screenState.copy(deviceName = btAction.getDeviceName())
+                        screenState.copy(deviceName = btApi.getDeviceName())
                     }
                 }
 
@@ -274,7 +278,7 @@ class ScreenViewModel @Inject constructor(
                     if (device != null) {
                         _state.update { screenState ->
                             screenState.copy(
-                                pairedDevicesList = btAction.getPaired(),
+                                pairedDevicesList = btApi.getPaired(),
                                 availableDeviceList = _state.value.availableDeviceList - device
                             )
                         }

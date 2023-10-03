@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm
+package com.example.Bluetooth2nd
 
 import org.junit.Test
 

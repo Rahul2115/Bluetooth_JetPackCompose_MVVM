@@ -13,7 +13,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 
-class BtActions(private val context:Context) {
+class BluetoothDataSource(private val context:Context) {
 
     private var mBluetoothAdapter: BluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
 

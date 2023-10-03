@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen
+package com.example.Bluetooth2nd.ui.presentation.mainscreen
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
@@ -40,7 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.bluetooth_jetpackcompose_mvvm.R
+import com.example.Bluetooth2nd.R
 
 
 @RequiresApi(Build.VERSION_CODES.R)

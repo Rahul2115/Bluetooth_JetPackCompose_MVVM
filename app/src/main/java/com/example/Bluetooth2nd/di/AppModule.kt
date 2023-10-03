@@ -1,7 +1,7 @@
-package com.example.bluetooth_jetpackcompose_mvvm.di
+package com.example.Bluetooth2nd.di
 
 import android.app.Application
-import com.example.bluetoothmodule.BtActions
+import com.example.bluetoothmodule.BluetoothDataSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,7 +13,7 @@ import javax.inject.Singleton
 object AppModule {
     @Provides
     @Singleton
-    fun provideMyBt(app:Application): BtActions {
-        return BtActions(app)
+    fun provideMyBt(app:Application): BluetoothDataSource {
+        return BluetoothDataSource(app)
     }
 }

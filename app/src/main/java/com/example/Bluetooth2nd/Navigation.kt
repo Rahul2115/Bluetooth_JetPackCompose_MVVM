@@ -1,4 +1,4 @@
-package com.example.bluetooth_jetpackcompose_mvvm
+package com.example.Bluetooth2nd
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -8,9 +8,9 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.MainScreen
-import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.NameScreen
-import com.example.bluetooth_jetpackcompose_mvvm.ui.presentation.mainscreen.ScreenViewModel
+import com.example.Bluetooth2nd.ui.presentation.mainscreen.MainScreen
+import com.example.Bluetooth2nd.ui.presentation.mainscreen.NameScreen
+import com.example.Bluetooth2nd.ui.presentation.mainscreen.ScreenViewModel
 
 @RequiresApi(Build.VERSION_CODES.R)
 @Composable
