@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Bluetooth2nd</string>
+    <string name="headphones">240404</string>
+    <string name="laptop">24010c</string>
+    <string name="watch">240704</string>
+    <string name="car">340408</string>
+    <string name="earphone">240408</string>
+    <string name="computer">240104</string>
+    <string name="phone">5a020c</string>
+    <string name="apple">7a020c</string>
 </resources>

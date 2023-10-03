@@ -19,12 +19,12 @@ fun Navigation(viewModel: ScreenViewModel) {
 
     val uiState by viewModel.state.collectAsState()
 
-    NavHost(navController = navController, startDestination = "mainScreen" ){
-        composable(route = "mainScreen") {
+    NavHost(navController = navController, startDestination = Screen.MainScreen.route ){
+        composable(route = Screen.MainScreen.route) {
             MainScreen(viewModel,navController = navController,uiState)
         }
 
-        composable(route = "nameScreen"){
+        composable(route = Screen.NameScreen.route){
             NameScreen(viewModel,navController = navController,uiState)
         }
     }

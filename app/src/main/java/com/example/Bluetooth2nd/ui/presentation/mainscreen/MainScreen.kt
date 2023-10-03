@@ -36,11 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.Bluetooth2nd.R
+import com.example.Bluetooth2nd.Screen
 
 
 @RequiresApi(Build.VERSION_CODES.R)
@@ -263,7 +265,7 @@ fun DeviceName(uiState: ScreenState,navController: NavController,viewModel: Scre
             .padding(top = 25.dp, start = 10.dp)
             .clickable {
                 if (uiState.btState) {
-                    navController.navigate("nameScreen")
+                    navController.navigate(Screen.NameScreen.route)
                 } else {
                     viewModel.toast("Turn on Bluetooth to continue.")
                 }
@@ -388,47 +390,47 @@ fun AvailableDevices(device: BluetoothDevice,viewModel: ScreenViewModel){
 @Composable
 fun DisplayIcon(device: String, modifier: Modifier){
     when (device) {
-        "240404" -> Image(
+        stringResource(R.string.headphones)-> Image(
             painter = painterResource(id = R.drawable.headphones),
             contentDescription = null,
             modifier = modifier
         )
 
-        "24010c" -> Image(
+        stringResource(R.string.laptop) -> Image(
             painter = painterResource(id = R.drawable.laptop),
             contentDescription = null,
             modifier = modifier
         )
 
-        "240704" -> Image(
+        stringResource(R.string.watch) -> Image(
             painter = painterResource(id = R.drawable.watch),
             contentDescription = null,
             modifier = modifier
         )
 
-        "340408" -> Image(painter = painterResource(id = R.drawable.car),
+        stringResource(R.string.car) -> Image(painter = painterResource(id = R.drawable.car),
             contentDescription = null,
             modifier = modifier
         )
 
-        "240408" -> Image(painter = painterResource(id = R.drawable.earphone),
+        stringResource(R.string.earphone) -> Image(painter = painterResource(id = R.drawable.earphone),
             contentDescription = null,
             modifier = modifier
         )
 
-        "240104" -> Image(
+        stringResource(R.string.computer) -> Image(
             painter = painterResource(id = R.drawable.computer),
             contentDescription = null,
             modifier = modifier
         )
 
-        "5a020c" -> Image(
+        stringResource(R.string.phone) -> Image(
             painter = painterResource(id = R.drawable.phone),
             contentDescription = null,
             modifier = modifier
         )
 
-        "7a020c" -> Image(
+        stringResource(R.string.apple) -> Image(
             painter = painterResource(id = R.drawable.apple),
             contentDescription = null,
             modifier = modifier
